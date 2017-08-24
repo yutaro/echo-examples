@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="ja">
+  <head>
+    <meta charset="utf-8">
+    <title>WebSocket</title>
+  </head>
+
+  <body>
+    <script>
+        let loc = window.location
+        let uri = 'ws:'
+
+        if (loc.protocol === 'https:'){
+          uri = 'wss:';
+        }
+
+        uri += '//' + loc.host;
+        uri += loc.pathname + 'ws';
+
+        ws = new WebSocket(uri);
+
+        ws.onopen = () => {
+          console.log('connected');
+        }
+
+       ws.onmessage = evt => {
+            console.log(JSON.parse(evt.data));
+        }
+    </script>
+  </body>
+<html>
+
