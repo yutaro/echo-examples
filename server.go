@@ -25,12 +25,6 @@ func hello(c echo.Context) error {
 			if err != nil {
 				c.Logger().Error(err)
 			}
-
-			//err = websocket.JSON.Receive(ws, &myaox)
-			//if err != nil {
-			//	c.Logger().Error(err)
-			//}
-			//fmt.Printf("%v\n", myaox)
 		}
 	}).ServeHTTP(c.Response(), c.Request())
 

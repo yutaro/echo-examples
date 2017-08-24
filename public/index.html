@@ -23,7 +23,7 @@
           console.log('connected');
         }
 
-       ws.onmessage = evt => {
+        ws.onmessage = evt => {
             console.log(JSON.parse(evt.data));
         }
     </script>
