@@ -38,14 +38,6 @@ L:
 
 		case client := <-r.leave:
 			delete(r.clients, client)
-			close(client.send)
-
-		case msg := <-r.forward:
-			for client := range r.clients {
-				client.send <- msg
-			}
-
-		default:
 			if len(r.clients) == 0 {
 				delete(rooms, r.id)
 				close(r.forward)
@@ -53,6 +45,11 @@ L:
 				close(r.leave)
 
 				break L
+			}
+
+		case msg := <-r.forward:
+			for client := range r.clients {
+				client.send <- msg
 			}
 		}
 	}
@@ -98,12 +95,13 @@ func chatws(c echo.Context) error {
 				cmt := new(comment)
 				err := websocket.JSON.Receive(ws, cmt)
 				if err != nil {
-					return
+					break
 				}
 				if cmt != new(comment) {
 					user.room.forward <- cmt
 				}
 			}
+			close(user.send)
 		}()
 
 		for {
@@ -113,7 +111,6 @@ func chatws(c echo.Context) error {
 				break
 			}
 		}
-
 	}).ServeHTTP(c.Response(), c.Request())
 	return nil
 }
