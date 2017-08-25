@@ -1,7 +1,7 @@
 package main
 
 import (
-	_ "fmt"
+	"fmt"
 	_ "time"
 
 	"github.com/labstack/echo"
@@ -35,6 +35,7 @@ L:
 		select {
 		case client := <-r.join:
 			r.clients[client] = true
+			fmt.Printf("room name : %s No.%d \n", r.id, len(r.clients))
 
 		case client := <-r.leave:
 			delete(r.clients, client)
