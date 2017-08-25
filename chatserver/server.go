@@ -81,7 +81,7 @@ func chatws(c echo.Context) error {
 				forward: make(chan *comment),
 				join:    make(chan *client),
 				leave:   make(chan *client),
-				clients: make(map[*client]bool),
+				clients: make(map[*client]bool, 1000),
 			}
 			user.room = newRoom
 			rooms[id] = newRoom
