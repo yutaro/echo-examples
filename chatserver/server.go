@@ -1,7 +1,7 @@
 package main
 
 import (
-	"fmt"
+	_ "fmt"
 	_ "time"
 
 	"github.com/labstack/echo"
@@ -35,6 +35,7 @@ L:
 		select {
 		case client := <-r.join:
 			r.clients[client] = true
+
 		case client := <-r.leave:
 			delete(r.clients, client)
 			close(client.send)
@@ -43,14 +44,13 @@ L:
 			for client := range r.clients {
 				client.send <- msg
 			}
+
 		default:
 			if len(r.clients) == 0 {
 				delete(rooms, r.id)
 				close(r.forward)
 				close(r.join)
 				close(r.leave)
-
-				fmt.Println("server closed")
 
 				break L
 			}
@@ -92,27 +92,25 @@ func chatws(c echo.Context) error {
 			go newRoom.run()
 			newRoom.join <- user
 		}
-	L:
-		for {
-			select {
-			case comment := <-user.send:
-				err := websocket.JSON.Send(ws, comment)
 
-				if err != nil {
-					break L
-				}
-
-			default:
+		go func() {
+			for {
 				cmt := new(comment)
 				err := websocket.JSON.Receive(ws, cmt)
 				if err != nil {
-					break L
+					return
 				}
-
-				if cmt != nil {
-					fmt.Println(cmt)
+				if cmt != new(comment) {
 					user.room.forward <- cmt
 				}
+			}
+		}()
+
+		for {
+			comment := <-user.send
+			err := websocket.JSON.Send(ws, comment)
+			if err != nil {
+				break
 			}
 		}
 
@@ -124,7 +122,7 @@ func main() {
 	e := echo.New()
 
 	e.Use(middleware.Logger())
-	//e.Use(middleware.Recover())
+	e.Use(middleware.Recover())
 
 	e.File("/chat/*", "./public/index.html")
 	e.GET("/chatws/:id", chatws)
