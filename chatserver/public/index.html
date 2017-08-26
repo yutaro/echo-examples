@@ -16,61 +16,62 @@
     </div>
     <script src="https://unpkg.com/vue"></script>
     <script>
-      let loc = window.location;
-      let urls = loc.href.split('/');
-      let id = urls[4];
 
-      let uri = 'ws:';
+let ws = null;
 
-      if (loc.protocol === 'https:'){
-        uri = 'wss:';
-      }
+let connection = {
+  initialize(){
+    let loc = window.location;
+    let urls = loc.href.split('/');
+    let id = urls[4];
 
-      uri += '//' + loc.host;
-      uri += '/chatws/' + id;
+    let uri = 'ws:';
+    if (loc.protocol === 'https:'){
+      uri = 'wss:';
+    }
+    uri += '//' + loc.host;
+    uri += '/chatws/' + id;
+    ws = new WebSocket(uri);
+  }
+};
 
-      ws = new WebSocket(uri);
+connection.initialize();
 
-      ws.onopen = () => {
-        console.log('connected');
-      }
 
-      ws.onmessage = evt => {
-          vm.comments.unshift(JSON.parse(evt.data));
-      }
+ws.onopen = () => {
+  console.log('connected');
+}
 
-      //setInterval(function() {
-      //        ws.send(
-      //          JSON.stringify({
-      //            Author : "utaro",
-      //            Val    : "こんにちは",
-      //            Replys : []
-      //           })
-      //        );
-      //}, 10000);
+ws.onmessage = evt => {
+  vm.comments.unshift(JSON.parse(evt.data));
+}
 
-      let vm = new Vue({
-        el : "#app",
-        data:{
-          name     : null,
-          val      : null,
-          comments : [],
-        },
-        methods : {
-          send(){
-            ws.send(
-              JSON.stringify({
-                Author : this.name,
-                Val    : this.val,
-                Replys : []
-              })
-            );
-            this.val  = "";
-          }
-        }
-      })
+ws.onclose = evt => {
+  console.log(evt.code);
+  setTimeout(connection.initialize, 100)
+}
 
-      console.log(uri);
+
+let vm = new Vue({
+  el : "#app",
+  data:{
+    name     : null,
+    val      : null,
+    comments : [],
+  },
+  methods : {
+    send(){
+      ws.send(
+        JSON.stringify({
+          Author : this.name,
+          Val    : this.val,
+          Replys : []
+        })
+      );
+      this.val  = "";
+    }
+  }
+});
     </script>
   </body>
 </html>
