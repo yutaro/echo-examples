@@ -32,25 +32,25 @@ let connection = {
     uri += '//' + loc.host;
     uri += '/chatws/' + id;
     ws = new WebSocket(uri);
+
+
+
+    ws.onopen = () => {
+      console.log('connected');
+    }
+
+    ws.onmessage = evt => {
+      vm.comments.unshift(JSON.parse(evt.data));
+    }
+
+    ws.onclose = evt => {
+      console.log(evt.code);
+      setTimeout(connection.initialize, 100);
+    }
   }
 };
 
 connection.initialize();
-
-
-ws.onopen = () => {
-  console.log('connected');
-}
-
-ws.onmessage = evt => {
-  vm.comments.unshift(JSON.parse(evt.data));
-}
-
-ws.onclose = evt => {
-  console.log(evt.code);
-  //setTimeout(connection.initialize, 100)
-}
-
 
 let vm = new Vue({
   el : "#app",
